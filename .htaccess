@@ -1,0 +1,22 @@
+# Zephora Logistics - Security Hardening
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Block direct access to PHP files
+RewriteRule ^includes/.*\.php$ - [F,L]
+RewriteRule ^templates/.*\.php$ - [F,L] 
+RewriteRule ^vendor/.*\.php$ - [F,L]
+# Allow index.php for WordPress
+RewriteRule ^index\.php$ - [L]
+</IfModule>
+
+# Block access to log files
+<FilesMatch "\.(log|ini|bak|sql|sh)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Protect audit log specifically
+<Files "zls-audit.log">
+    Order Deny,Allow
+    Deny from all
+</Files>
