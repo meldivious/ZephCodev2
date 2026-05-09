@@ -619,6 +619,8 @@ class ZLS_Admin_UI {
             wp_die('Unauthorized');
         }
         
+        $saved = false;
+        
         // Handle save
         if (isset($_POST['zls_save_email_templates'], $_POST['zls_email_nonce']) && wp_verify_nonce($_POST['zls_email_nonce'], 'zls_email_templates')) {
             $templates = array();
@@ -631,12 +633,32 @@ class ZLS_Admin_UI {
                 );
             }
             update_option('zls_email_templates', $templates);
+            $saved = true;
+        }
+        
+        if ($saved) {
             echo '<div class="notice notice-success"><p>Email templates saved successfully.</p></div>';
         }
         
         $templates = get_option('zls_email_templates', array());
-        $defaults = ZLS_Settings::get_instance()->get_default_email_templates();
+        $settings_instance = ZLS_Settings::get_instance();
+        $defaults = method_exists($settings_instance, 'get_default_email_templates') ? $settings_instance->get_default_email_templates() : array();
         $admin_email = get_option('admin_email');
+        
+        if (empty($defaults)) {
+            $defaults = array(
+                'kyc_approved' => array('label' => 'KYC Approved', 'description' => 'Sent when admin approves user KYC verification', 'recipient' => 'user', 'subject' => 'KYC Approved', 'message' => ''),
+                'kyc_denied' => array('label' => 'KYC Denied', 'description' => 'Sent when admin denies user KYC verification', 'recipient' => 'user', 'subject' => 'KYC Verification Update', 'message' => ''),
+                'kyc_banned' => array('label' => 'Account Suspended', 'description' => 'Sent when admin bans/suspends a user account', 'recipient' => 'user', 'subject' => 'Account Suspension Notice', 'message' => ''),
+                'quote_sent' => array('label' => 'Quote Ready Notification', 'description' => 'Sent when admin sets a quote for the request', 'recipient' => 'user', 'subject' => 'Quote Ready', 'message' => ''),
+                'paid' => array('label' => 'Payment Confirmed', 'description' => 'Sent when admin confirms payment has been received', 'recipient' => 'both', 'subject' => 'Payment Confirmed', 'message' => ''),
+                'purchasing' => array('label' => 'Purchasing in Progress', 'description' => 'Sent when admin starts purchasing the item', 'recipient' => 'user', 'subject' => 'Purchasing Your Item', 'message' => ''),
+                'received_us' => array('label' => 'Received at US Warehouse', 'description' => 'Sent when item arrives at US warehouse', 'recipient' => 'user', 'subject' => 'Item Received at US Warehouse', 'message' => ''),
+                'shipped' => array('label' => 'Package Shipped', 'description' => 'Sent when package leaves the warehouse', 'recipient' => 'user', 'subject' => 'Your Package is On the Way', 'message' => ''),
+                'delivered' => array('label' => 'Delivery Complete', 'description' => 'Sent when package is delivered to customer', 'recipient' => 'user', 'subject' => 'Your Package Has Arrived', 'message' => ''),
+                'cancelled' => array('label' => 'Request Cancelled', 'description' => 'Sent when a request is cancelled', 'recipient' => 'both', 'subject' => 'Request Cancelled', 'message' => ''),
+            );
+        }
         ?>
         <div class="wrap zls-admin-wrap">
             <h1 class="wp-heading-inline">Email Templates</h1>
