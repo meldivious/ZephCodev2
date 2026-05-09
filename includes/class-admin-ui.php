@@ -81,20 +81,20 @@ class ZLS_Admin_UI {
         
         add_submenu_page(
             'zls-dashboard',
-            'Email Templates',
-            'Email Templates',
-            'manage_options',
-            'zls-email-templates',
-            [__CLASS__, 'render_email_templates']
-        );
-        
-        add_submenu_page(
-            'zls-dashboard',
             'Settings',
             'Settings',
             'manage_options',
             'zls-settings',
             [__CLASS__, 'render_settings']
+        );
+        
+        add_submenu_page(
+            'zls-dashboard',
+            'Email Templates',
+            'Email Templates',
+            'manage_options',
+            'zls-email-templates',
+            [__CLASS__, 'render_email_templates']
         );
     }
 
@@ -926,13 +926,6 @@ class ZLS_Admin_UI {
         return count($users);
     }
 }
-
-// Initialize
-add_action('init', function() {
-    if (class_exists('ZLS_Admin_UI')) {
-        ZLS_Admin_UI::init();
-    }
-}, 20);
 
 // Add filters to list tables
 add_action('restrict_manage_posts', function() {
