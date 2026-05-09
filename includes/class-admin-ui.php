@@ -619,8 +619,6 @@ class ZLS_Admin_UI {
             wp_die('Unauthorized');
         }
         
-        $saved = false;
-        
         // Handle save
         if (isset($_POST['zls_save_email_templates'], $_POST['zls_email_nonce']) && wp_verify_nonce($_POST['zls_email_nonce'], 'zls_email_templates')) {
             $templates = array();
@@ -633,32 +631,84 @@ class ZLS_Admin_UI {
                 );
             }
             update_option('zls_email_templates', $templates);
-            $saved = true;
-        }
-        
-        if ($saved) {
             echo '<div class="notice notice-success"><p>Email templates saved successfully.</p></div>';
         }
         
         $templates = get_option('zls_email_templates', array());
-        $settings_instance = ZLS_Settings::get_instance();
-        $defaults = method_exists($settings_instance, 'get_default_email_templates') ? $settings_instance->get_default_email_templates() : array();
-        $admin_email = get_option('admin_email');
         
-        if (empty($defaults)) {
-            $defaults = array(
-                'kyc_approved' => array('label' => 'KYC Approved', 'description' => 'Sent when admin approves user KYC verification', 'recipient' => 'user', 'subject' => 'KYC Approved', 'message' => ''),
-                'kyc_denied' => array('label' => 'KYC Denied', 'description' => 'Sent when admin denies user KYC verification', 'recipient' => 'user', 'subject' => 'KYC Verification Update', 'message' => ''),
-                'kyc_banned' => array('label' => 'Account Suspended', 'description' => 'Sent when admin bans/suspends a user account', 'recipient' => 'user', 'subject' => 'Account Suspension Notice', 'message' => ''),
-                'quote_sent' => array('label' => 'Quote Ready Notification', 'description' => 'Sent when admin sets a quote for the request', 'recipient' => 'user', 'subject' => 'Quote Ready', 'message' => ''),
-                'paid' => array('label' => 'Payment Confirmed', 'description' => 'Sent when admin confirms payment has been received', 'recipient' => 'both', 'subject' => 'Payment Confirmed', 'message' => ''),
-                'purchasing' => array('label' => 'Purchasing in Progress', 'description' => 'Sent when admin starts purchasing the item', 'recipient' => 'user', 'subject' => 'Purchasing Your Item', 'message' => ''),
-                'received_us' => array('label' => 'Received at US Warehouse', 'description' => 'Sent when item arrives at US warehouse', 'recipient' => 'user', 'subject' => 'Item Received at US Warehouse', 'message' => ''),
-                'shipped' => array('label' => 'Package Shipped', 'description' => 'Sent when package leaves the warehouse', 'recipient' => 'user', 'subject' => 'Your Package is On the Way', 'message' => ''),
-                'delivered' => array('label' => 'Delivery Complete', 'description' => 'Sent when package is delivered to customer', 'recipient' => 'user', 'subject' => 'Your Package Has Arrived', 'message' => ''),
-                'cancelled' => array('label' => 'Request Cancelled', 'description' => 'Sent when a request is cancelled', 'recipient' => 'both', 'subject' => 'Request Cancelled', 'message' => ''),
-            );
-        }
+        // Default templates - hardcoded to ensure they always display
+        $defaults = array(
+            'kyc_approved' => array(
+                'label' => 'KYC Approved',
+                'description' => 'Sent when admin approves user KYC verification',
+                'recipient' => 'user',
+                'subject' => 'KYC Approved - Welcome to Zephora Logistics!',
+                'message' => 'Hi {{customer_name}},<br><br>Congratulations! Your KYC verification has been approved.<br><br>You now have full access to our SHIP FOR ME and BUY FOR ME services.<br><br>Login to your dashboard to get started: <a href="' . home_url('/my-dashboard') . '">My Dashboard</a><br><br>Thank you for choosing Zephora Logistics!<br><br>Best regards,<br>Zephora Logistics Team<br>{{admin_email}}'
+            ),
+            'kyc_denied' => array(
+                'label' => 'KYC Denied',
+                'description' => 'Sent when admin denies user KYC verification',
+                'recipient' => 'user',
+                'subject' => 'KYC Verification Update',
+                'message' => 'Hi {{customer_name}},<br><br>Your KYC submission was reviewed and unfortunately denied.<br><br>Please review the KYC requirements and resubmit your verification documents.<br><br>If you have questions, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'kyc_banned' => array(
+                'label' => 'Account Suspended',
+                'description' => 'Sent when admin bans/suspends a user account',
+                'recipient' => 'user',
+                'subject' => 'Account Suspension Notice',
+                'message' => 'Hi {{customer_name}},<br><br>Your account has been suspended.<br><br>Please contact our support team at {{admin_email}} for assistance.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'quote_sent' => array(
+                'label' => 'Quote Ready Notification',
+                'description' => 'Sent when admin sets a quote for the request',
+                'recipient' => 'user',
+                'subject' => 'Quote Ready: {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Your quote for <strong>{{item}}</strong> is ready!<br><br><strong>Amount: ₦{{amount}} + VAT</strong><br><br>Please login to your dashboard to review and confirm payment.<br><br>Thank you,<br>Zephora Logistics Team'
+            ),
+            'paid' => array(
+                'label' => 'Payment Confirmed',
+                'description' => 'Sent when admin confirms payment has been received',
+                'recipient' => 'both',
+                'subject' => 'Payment Confirmed - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>We have confirmed receipt of your payment (₦{{amount}}).<br><br>Your order is now being processed. We will update you shortly.<br><br><strong>Request ID:</strong> {{request_date}}<br><br>Thank you for your business!<br>Zephora Logistics Team'
+            ),
+            'purchasing' => array(
+                'label' => 'Purchasing in Progress',
+                'description' => 'Sent when admin starts purchasing the item',
+                'recipient' => 'user',
+                'subject' => 'We are Purchasing Your Item - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Great news! We are now purchasing your item.<br><br><strong>Item:</strong> {{item}}<br><br>We will notify you once it arrives at our warehouse.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'received_us' => array(
+                'label' => 'Received at US Warehouse',
+                'description' => 'Sent when item arrives at US warehouse',
+                'recipient' => 'user',
+                'subject' => 'Item Received at US Warehouse - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Your item has been received at our US warehouse.<br><br><strong>Item:</strong> {{item}}<br><br>We will prepare it for shipment to Nigeria shortly.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'shipped' => array(
+                'label' => 'Package Shipped',
+                'description' => 'Sent when package leaves the warehouse',
+                'recipient' => 'user',
+                'subject' => 'Your Package is On the Way - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Great news! Your package is on the way to Nigeria.<br><br><strong>Tracking Number:</strong> {{tracking}}<br><strong>Item:</strong> {{item}}<br><br>You can track your shipment using the tracking number. We will notify you once it arrives in Lagos.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'delivered' => array(
+                'label' => 'Delivery Complete',
+                'description' => 'Sent when package is delivered to customer',
+                'recipient' => 'user',
+                'subject' => 'Your Package Has Arrived! - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Your package has been successfully delivered!<br><br><strong>Item:</strong> {{item}}<br><strong>Tracking:</strong> {{tracking}}<br><br>Thank you for choosing Zephora Logistics. We hope you enjoy your purchase!<br><br>If you have any questions, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'cancelled' => array(
+                'label' => 'Request Cancelled',
+                'description' => 'Sent when a request is cancelled by admin or customer',
+                'recipient' => 'both',
+                'subject' => 'Request Cancelled - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Your request has been cancelled.<br><br><strong>Item:</strong> {{item}}<br><strong>Request Date:</strong> {{request_date}}<br><br>If you have any questions about this cancellation or need assistance, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
+            )
+        );
         ?>
         <div class="wrap zls-admin-wrap">
             <h1 class="wp-heading-inline">Email Templates</h1>
