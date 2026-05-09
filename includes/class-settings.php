@@ -205,6 +205,13 @@ class ZLS_Settings {
                 'recipient' => 'user',
                 'subject' => 'Your Package Has Arrived! - {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>Your package has been successfully delivered!<br><br><strong>Item:</strong> {{item}}<br><strong>Tracking:</strong> {{tracking}}<br><br>Thank you for choosing Zephora Logistics. We hope you enjoy your purchase!<br><br>If you have any questions, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
+            ),
+            'cancelled' => array(
+                'label' => 'Request Cancelled',
+                'description' => 'Sent when a request is cancelled by admin or customer',
+                'recipient' => 'both',
+                'subject' => 'Request Cancelled - {{item}}',
+                'message' => 'Hi {{customer_name}},<br><br>Your request has been cancelled.<br><br><strong>Item:</strong> {{item}}<br><strong>Request Date:</strong> {{request_date}}<br><br>If you have any questions about this cancellation or need assistance, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
             )
         );
     }

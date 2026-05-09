@@ -391,8 +391,41 @@ class ZLS_Admin_UI {
             echo '<div class="notice notice-success"><p>Warehouse address saved successfully.</p></div>';
         }
         
+        // Handle save - SMTP Settings
+        if (isset($_POST['zls_save_smtp_settings'], $_POST['zls_smtp_nonce']) && wp_verify_nonce($_POST['zls_smtp_nonce'], 'zls_smtp_settings')) {
+            $smtp = array(
+                'enabled' => isset($_POST['smtp_enabled']) ? true : false,
+                'host' => sanitize_text_field($_POST['smtp_host'] ?? ''),
+                'port' => absint($_POST['smtp_port'] ?? 587),
+                'encryption' => sanitize_text_field($_POST['smtp_encryption'] ?? 'tls'),
+                'username' => sanitize_text_field($_POST['smtp_username'] ?? ''),
+                'password' => sanitize_text_field($_POST['smtp_password'] ?? ''),
+                'from_email' => sanitize_email($_POST['smtp_from_email'] ?? get_option('admin_email')),
+                'from_name' => sanitize_text_field($_POST['smtp_from_name'] ?? get_bloginfo('name')),
+            );
+            update_option('zls_smtp_settings', $smtp);
+            echo '<div class="notice notice-success"><p>SMTP settings saved successfully.</p></div>';
+        }
+        
+        // Handle test email
+        if (isset($_POST['zls_test_email'], $_POST['zls_test_nonce']) && wp_verify_nonce($_POST['zls_test_nonce'], 'zls_test_email')) {
+            $test_email = sanitize_email($_POST['test_email_to']);
+            if ($test_email) {
+                $subject = 'Zephora Logistics - Test Email';
+                $message = '<h2>Test Email Successful</h2><p>This is a test email from your Zephora Logistics plugin.</p><p>If you received this, your SMTP configuration is working correctly.</p><p>Sent at: ' . current_time('mysql') . '</p>';
+                $headers = array('Content-Type: text/html; charset=UTF-8');
+                
+                if (wp_mail($test_email, $subject, $message, $headers)) {
+                    echo '<div class="notice notice-success"><p>Test email sent successfully to ' . esc_html($test_email) . '</p></div>';
+                } else {
+                    echo '<div class="notice notice-error"><p>Failed to send test email. Check your SMTP configuration.</p></div>';
+                }
+            }
+        }
+        
         $bank = get_option('zls_bank_details', array());
         $warehouse = get_option('zls_warehouse_address', array());
+        $smtp = get_option('zls_smtp_settings', array());
         ?>
         <div class="wrap zls-admin-wrap">
             <h1 class="wp-heading-inline">Settings</h1>
@@ -480,8 +513,104 @@ class ZLS_Admin_UI {
                     <button type="submit" name="zls_save_warehouse_address" class="button button-primary">Save Warehouse Address</button>
                 </div>
             </form>
+            
+            <!-- SMTP Settings Form -->
+            <form method="post" class="zls-card">
+                <?php wp_nonce_field('zls_smtp_settings', 'zls_smtp_nonce'); ?>
+                
+                <div class="zls-card-header">
+                    <h2 class="zls-card-title">SMTP Email Configuration</h2>
+                    <p class="description">Configure SMTP for reliable email delivery. Leave disabled to use default WordPress mail.</p>
+                </div>
+                
+                <div class="zls-form-group">
+                    <label style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" name="smtp_enabled" <?php checked(!empty($smtp['enabled'])); ?>>
+                        Enable SMTP
+                    </label>
+                </div>
+                
+                <div class="zls-form-grid">
+                    <div class="zls-form-group">
+                        <label>SMTP Host</label>
+                        <input type="text" name="smtp_host" value="<?php echo esc_attr($smtp['host'] ?? ''); ?>" class="regular-text" placeholder="smtp.gmail.com">
+                    </div>
+                    <div class="zls-form-group">
+                        <label>SMTP Port</label>
+                        <input type="number" name="smtp_port" value="<?php echo esc_attr($smtp['port'] ?? '587'); ?>" class="small-text" placeholder="587">
+                    </div>
+                    <div class="zls-form-group">
+                        <label>Encryption</label>
+                        <select name="smtp_encryption" class="regular-text">
+                            <option value="">None</option>
+                            <option value="tls" <?php selected($smtp['encryption'] ?? '', 'tls'); ?>>TLS</option>
+                            <option value="ssl" <?php selected($smtp['encryption'] ?? '', 'ssl'); ?>>SSL</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="zls-form-grid">
+                    <div class="zls-form-group">
+                        <label>SMTP Username</label>
+                        <input type="text" name="smtp_username" value="<?php echo esc_attr($smtp['username'] ?? ''); ?>" class="regular-text">
+                    </div>
+                    <div class="zls-form-group">
+                        <label>SMTP Password</label>
+                        <input type="password" name="smtp_password" value="<?php echo esc_attr($smtp['password'] ?? ''); ?>" class="regular-text">
+                    </div>
+                </div>
+                
+                <div class="zls-form-grid">
+                    <div class="zls-form-group">
+                        <label>From Email</label>
+                        <input type="email" name="smtp_from_email" value="<?php echo esc_attr($smtp['from_email'] ?? get_option('admin_email')); ?>" class="regular-text">
+                    </div>
+                    <div class="zls-form-group">
+                        <label>From Name</label>
+                        <input type="text" name="smtp_from_name" value="<?php echo esc_attr($smtp['from_name'] ?? get_bloginfo('name')); ?>" class="regular-text">
+                    </div>
+                </div>
+                
+                <div style="margin-top:24px;">
+                    <button type="submit" name="zls_save_smtp_settings" class="button button-primary">Save SMTP Settings</button>
+                </div>
+            </form>
+            
+            <!-- Test Email Form -->
+            <form method="post" class="zls-card">
+                <?php wp_nonce_field('zls_test_email', 'zls_test_nonce'); ?>
+                
+                <div class="zls-card-header">
+                    <h2 class="zls-card-title">Test Email Delivery</h2>
+                    <p class="description">Send a test email to verify your configuration.</p>
+                </div>
+                
+                <div class="zls-form-group">
+                    <label>Send Test Email To</label>
+                    <input type="email" name="test_email_to" value="<?php echo esc_attr(get_option('admin_email')); ?>" class="regular-text" required>
+                </div>
+                
+                <div style="margin-top:24px;">
+                    <button type="submit" name="zls_test_email" class="button">Send Test Email</button>
+                </div>
+            </form>
         </div>
+        
         <?php
+        // Hook into PHPMailer if SMTP is enabled
+        add_action('phpmailer_init', function($phpmailer) use ($smtp) {
+            if (empty($smtp['enabled']) || empty($smtp['host'])) return;
+            
+            $phpmailer->isSMTP();
+            $phpmailer->Host = $smtp['host'];
+            $phpmailer->Port = $smtp['port'];
+            $phpmailer->SMTPAuth = true;
+            $phpmailer->Username = $smtp['username'];
+            $phpmailer->Password = $smtp['password'];
+            $phpmailer->SMTPSecure = $smtp['encryption'];
+            $phpmailer->setFrom($smtp['from_email'], $smtp['from_name']);
+        });
+        ?>
     }
 
     // EMAIL TEMPLATES PAGE
@@ -493,7 +622,7 @@ class ZLS_Admin_UI {
         // Handle save
         if (isset($_POST['zls_save_email_templates'], $_POST['zls_email_nonce']) && wp_verify_nonce($_POST['zls_email_nonce'], 'zls_email_templates')) {
             $templates = array();
-            $events = array('kyc_approved', 'kyc_denied', 'kyc_banned', 'quote_sent', 'paid', 'purchasing', 'received_us', 'shipped', 'delivered');
+            $events = array('kyc_approved', 'kyc_denied', 'kyc_banned', 'quote_sent', 'paid', 'purchasing', 'received_us', 'shipped', 'delivered', 'cancelled');
             foreach ($events as $event) {
                 $templates[$event] = array(
                     'recipient' => sanitize_text_field($_POST['zls_email_templates'][$event]['recipient'] ?? 'user'),

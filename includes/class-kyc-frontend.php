@@ -690,38 +690,90 @@ handleFileSelect(input, id);
 <?php
 // Handle Upload Submission
 if (isset($_POST['zls_submit_kyc']) && isset($_POST['zls_kyc_nonce']) && wp_verify_nonce($_POST['zls_kyc_nonce'], 'zls_kyc_upload')) {
-if (isset($_FILES['zls_gov_id']) && isset($_FILES['zls_proof_address'])) {
-// Validation logic
-$allowed = ['image/jpeg', 'image/png', 'application/pdf'];
-$max_size = 10 * 1024 * 1024; // 10MB
-if (!in_array($_FILES['zls_gov_id']['type'], $allowed) || $_FILES['zls_gov_id']['size'] > $max_size) {
-echo '<div class="zls-alert error">Invalid Government ID file type or size (Max 10MB).</div>';
-} elseif (!in_array($_FILES['zls_proof_address']['type'], $allowed) || $_FILES['zls_proof_address']['size'] > $max_size) {
-echo '<div class="zls-alert error">Invalid Proof of Address file type or size (Max 10MB).</div>';
-} else {
-// Secure Upload
-$upload_dir = wp_upload_dir();
-$kyc_dir = $upload_dir['basedir'] . '/zls-kyc-documents/' . $user_id;
-if (!file_exists($kyc_dir)) {
-wp_mkdir_p($kyc_dir);
-file_put_contents($kyc_dir . '/.htaccess', "Deny from all");
-}
-$gov_name = 'gov_id_' . time() . '_' . wp_generate_password(8, false) . '.' . pathinfo($_FILES['zls_gov_id']['name'], PATHINFO_EXTENSION);
-$addr_name = 'addr_' . time() . '_' . wp_generate_password(8, false) . '.' . pathinfo($_FILES['zls_proof_address']['name'], PATHINFO_EXTENSION);
-if (move_uploaded_file($_FILES['zls_gov_id']['tmp_name'], $kyc_dir . '/' . $gov_name) &&
-move_uploaded_file($_FILES['zls_proof_address']['tmp_name'], $kyc_dir . '/' . $addr_name)) {
-update_user_meta($user_id, '_zls_kyc_data', [
-'gov_id_file' => $gov_name,
-'proof_address_file' => $addr_name,
-'submitted_at' => current_time('mysql')
-]);
-update_user_meta($user_id, '_zls_kyc_status', 'pending');
-echo '<script>document.getElementById("zls-kyc-form").style.display="none"; document.querySelector(".zls-kyc-header h1").textContent="Submission Successful!"; document.querySelector(".zls-kyc-header p").textContent="Your documents have been received. You will be notified once reviewed."; document.querySelector(".zls-stepper .zls-step-circle.active").classList.add("done"); document.querySelector(".zls-stepper .zls-step-circle.active").textContent="✓"; </script>';
-} else {
-echo '<div class="zls-alert error">Failed to upload files. Please try again.</div>';
-}
-}
-}
+    if (isset($_FILES['zls_gov_id']) && isset($_FILES['zls_proof_address'])) {
+        // Enhanced Validation logic
+        $allowed_types = array('image/jpeg', 'image/jpg', 'image/png', 'application/pdf');
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'pdf');
+        $max_size = 5 * 1024 * 1024; // 5MB reduced from 10MB for security
+        
+        // Validate Government ID
+        $gov_type = $_FILES['zls_gov_id']['type'];
+        $gov_ext = strtolower(pathinfo($_FILES['zls_gov_id']['name'], PATHINFO_EXTENSION));
+        $gov_size = $_FILES['zls_gov_id']['size'];
+        
+        // Check file type by MIME and extension
+        if (!in_array($gov_type, $allowed_types) || !in_array($gov_ext, $allowed_extensions)) {
+            echo '<div class="zls-alert error">Invalid Government ID file type. Only JPG, PNG, and PDF are allowed.</div>';
+        } elseif ($gov_size > $max_size) {
+            echo '<div class="zls-alert error">Government ID file is too large. Maximum size is 5MB.</div>';
+        } else {
+            // Validate Proof of Address
+            $addr_type = $_FILES['zls_proof_address']['type'];
+            $addr_ext = strtolower(pathinfo($_FILES['zls_proof_address']['name'], PATHINFO_EXTENSION));
+            $addr_size = $_FILES['zls_proof_address']['size'];
+            
+            if (!in_array($addr_type, $allowed_types) || !in_array($addr_ext, $allowed_extensions)) {
+                echo '<div class="zls-alert error">Invalid Proof of Address file type. Only JPG, PNG, and PDF are allowed.</div>';
+            } elseif ($addr_size > $max_size) {
+                echo '<div class="zls-alert error">Proof of Address file is too large. Maximum size is 5MB.</div>';
+            } else {
+                // Additional security: Check for actual file content (not just extension)
+                $gov_tmp = $_FILES['zls_gov_id']['tmp_name'];
+                $addr_tmp = $_FILES['zls_proof_address']['tmp_name'];
+                
+                // Check for malicious content in images
+                if (in_array($gov_ext, array('jpg', 'jpeg', 'png'))) {
+                    $img_info = @getimagesize($gov_tmp);
+                    if (!$img_info || !in_array($img_info['mime'], array('image/jpeg', 'image/png'))) {
+                        echo '<div class="zls-alert error">Government ID file appears to be corrupted or invalid.</div>';
+                        return ob_get_clean();
+                    }
+                }
+                
+                if (in_array($addr_ext, array('jpg', 'jpeg', 'png'))) {
+                    $img_info = @getimagesize($addr_tmp);
+                    if (!$img_info || !in_array($img_info['mime'], array('image/jpeg', 'image/png'))) {
+                        echo '<div class="zls-alert error">Proof of Address file appears to be corrupted or invalid.</div>';
+                        return ob_get_clean();
+                    }
+                }
+                
+                // Secure Upload
+                $upload_dir = wp_upload_dir();
+                $kyc_dir = $upload_dir['basedir'] . '/zls-kyc-documents/' . $user_id;
+                
+                if (!file_exists($kyc_dir)) {
+                    wp_mkdir_p($kyc_dir);
+                    // Create .htaccess to prevent direct access
+                    file_put_contents($kyc_dir . '/.htaccess', "Deny from all\nRemoveHandler .php .phtml .php3 .php4 .php5\nRemoveType .php .phtml .php3 .php4 .php5\n<FilesMatch \"\\.(jpg|jpeg|png|pdf)$\">\nOrder Allow,Deny\nAllow from all\n</FilesMatch>");
+                }
+                
+                // Generate secure filenames
+                $gov_name = 'gov_id_' . $user_id . '_' . time() . '_' . wp_generate_password(12, false) . '.' . $gov_ext;
+                $addr_name = 'addr_' . $user_id . '_' . time() . '_' . wp_generate_password(12, false) . '.' . $addr_ext;
+                
+                $gov_path = $kyc_dir . '/' . $gov_name;
+                $addr_path = $kyc_dir . '/' . $addr_name;
+                
+                if (move_uploaded_file($gov_tmp, $gov_path) && move_uploaded_file($addr_tmp, $addr_path)) {
+                    // Set restrictive permissions on uploaded files
+                    chmod($gov_path, 0644);
+                    chmod($addr_path, 0644);
+                    
+                    update_user_meta($user_id, '_zls_kyc_data', array(
+                        'gov_id_file' => $gov_name,
+                        'proof_address_file' => $addr_name,
+                        'submitted_at' => current_time('mysql')
+                    ));
+                    update_user_meta($user_id, '_zls_kyc_status', 'pending');
+                    
+                    echo '<script>document.getElementById("zls-kyc-form").style.display="none"; document.querySelector(".zls-kyc-header h1").textContent="Submission Successful!"; document.querySelector(".zls-kyc-header p").textContent="Your documents have been received. You will be notified once reviewed."; document.querySelector(".zls-stepper .zls-step-circle.active").classList.add("done"); document.querySelector(".zls-stepper .zls-step-circle.active").textContent="✓"; </script>';
+                } else {
+                    echo '<div class="zls-alert error">Failed to upload files. Please try again or contact support.</div>';
+                }
+            }
+        }
+    }
 }
 return ob_get_clean();
 }
