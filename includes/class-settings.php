@@ -17,8 +17,6 @@ class ZLS_Settings {
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-        add_action('wp_ajax_zls_add_address', array($this, 'ajax_add_address'));
-        add_action('wp_ajax_zls_remove_address', array($this, 'ajax_remove_address'));
     }
     
     public function add_settings_page() {
@@ -28,7 +26,7 @@ class ZLS_Settings {
     
     public function register_settings() {
         register_setting('zls_settings_group', 'zls_settings');
-        register_setting('zls_settings_group', 'zls_us_addresses');
+        register_setting('zls_settings_group', 'zls_warehouse_address');
         register_setting('zls_settings_group', 'zls_bank_details');
         register_setting('zls_settings_group', 'zls_email_templates');
     }
@@ -43,7 +41,7 @@ class ZLS_Settings {
     public function render_page() {
         $settings = get_option('zls_settings', array());
         $bank = get_option('zls_bank_details', array());
-        $addrs = get_option('zls_us_addresses', array());
+        $warehouse = get_option('zls_warehouse_address', array());
         $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'addresses';
         ?>
         <div class="wrap zls-settings-wrap">
@@ -52,44 +50,23 @@ class ZLS_Settings {
                 <?php settings_fields('zls_settings_group'); ?>
                 
                 <nav class="zls-settings-tabs">
-                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">🇺🇸 US Addresses</button>
+                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">🇺🇸 US Warehouse Address</button>
                     <button type="button" class="<?php echo $active_tab === 'bank' ? 'active' : ''; ?>" data-tab="bank">🏦 Bank Details</button>
                     <button type="button" class="<?php echo $active_tab === 'email' ? 'active' : ''; ?>" data-tab="email">✉️ Email Templates</button>
                 </nav>
                 
                 <div class="zls-settings-tab <?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" id="tab-addresses" style="<?php echo $active_tab === 'addresses' ? '' : 'display:none;'; ?>">
-                    <p class="description">Manage multiple US warehouse addresses. Only active addresses appear on the frontend.</p>
-                    <div id="zls-addresses-list">
-                        <?php foreach ($addrs as $addr): ?>
-                        <div class="zls-address-card" data-id="<?php echo esc_attr($addr['id']); ?>">
-                            <div class="zls-address-header">
-                                <strong><?php echo esc_html($addr['label']); ?></strong>
-                                <span class="zls-badge <?php echo $addr['is_active'] ? 'zls-active' : 'zls-inactive'; ?>"><?php echo $addr['is_active'] ? 'Active' : 'Inactive'; ?></span>
-                                <button type="button" class="zls-btn-remove" data-id="<?php echo esc_attr($addr['id']); ?>">✕</button>
-                            </div>
-                            <div class="zls-address-body">
-                                <p><?php echo esc_html($addr['address_line1']); ?><?php if(!empty($addr['address_line2'])) echo ', ' . esc_html($addr['address_line2']); ?><br>
-                                <?php echo esc_html($addr['city']); ?>, <?php echo esc_html($addr['state']); ?> <?php echo esc_html($addr['postal_code']); ?>, <?php echo esc_html($addr['country']); ?><br>
-                                📞 <?php echo esc_html($addr['contact_phone']); ?></p>
-                            </div>
-                            <input type="hidden" name="zls_us_addresses[<?php echo esc_attr($addr['id']); ?>][is_active]" value="0">
-                            <label><input type="checkbox" name="zls_us_addresses[<?php echo esc_attr($addr['id']); ?>][is_active]" value="1" <?php checked($addr['is_active']); ?>> Show to customers</label>
-                        </div>
-                        <?php endforeach; ?>
+                    <p class="description">Enter your US warehouse address. This address will be displayed to customers on their dashboard.</p>
+                    <div class="zls-warehouse-form" style="background:#f9f9f9;padding:20px;border-radius:8px;">
+                        <h3>US Warehouse Address</h3>
+                        <p><label>Address Line 1<br><input type="text" name="zls_warehouse_address[address_line1]" value="<?php echo esc_attr($warehouse['address_line1'] ?? ''); ?>" class="regular-text" required></label></p>
+                        <p><label>Address Line 2 (Optional)<br><input type="text" name="zls_warehouse_address[address_line2]" value="<?php echo esc_attr($warehouse['address_line2'] ?? ''); ?>" class="regular-text"></label></p>
+                        <p><label>City<br><input type="text" name="zls_warehouse_address[city]" value="<?php echo esc_attr($warehouse['city'] ?? ''); ?>" class="regular-text" required></label></p>
+                        <p><label>State<br><input type="text" name="zls_warehouse_address[state]" value="<?php echo esc_attr($warehouse['state'] ?? ''); ?>" class="regular-text" required></label></p>
+                        <p><label>Postal Code<br><input type="text" name="zls_warehouse_address[postal_code]" value="<?php echo esc_attr($warehouse['postal_code'] ?? ''); ?>" class="regular-text" required></label></p>
+                        <p><label>Country<br><input type="text" name="zls_warehouse_address[country]" value="<?php echo esc_attr($warehouse['country'] ?? 'USA'); ?>" class="regular-text"></label></p>
+                        <p><label>Phone<br><input type="text" name="zls_warehouse_address[contact_phone]" value="<?php echo esc_attr($warehouse['contact_phone'] ?? ''); ?>" class="regular-text"></label></p>
                     </div>
-                    <div class="zls-address-form" style="margin-top:20px;display:none;background:#f9f9f9;padding:15px;border-radius:8px;">
-                        <h3>Add New Address</h3>
-                        <p><label>Label<br><input type="text" name="zls_us_addresses[new][label]" class="regular-text" required></label></p>
-                        <p><label>Address Line 1<br><input type="text" name="zls_us_addresses[new][address_line1]" class="regular-text" required></label></p>
-                        <p><label>Address Line 2<br><input type="text" name="zls_us_addresses[new][address_line2]" class="regular-text"></label></p>
-                        <p><label>City<br><input type="text" name="zls_us_addresses[new][city]" class="regular-text" required></label></p>
-                        <p><label>State<br><input type="text" name="zls_us_addresses[new][state]" class="regular-text" required></label></p>
-                        <p><label>Postal Code<br><input type="text" name="zls_us_addresses[new][postal_code]" class="regular-text"></label></p>
-                        <p><label>Country<br><input type="text" name="zls_us_addresses[new][country]" class="regular-text" value="USA"></label></p>
-                        <p><label>Phone<br><input type="text" name="zls_us_addresses[new][contact_phone]" class="regular-text"></label></p>
-                        <p><button type="button" id="zls-add-address-btn" class="button button-primary">Add Address</button></p>
-                    </div>
-                    <p><button type="button" id="zls-show-address-form" class="button">+ Add New Address</button></p>
                 </div>
                 
                 <div class="zls-settings-tab <?php echo $active_tab === 'bank' ? 'active' : ''; ?>" id="tab-bank" style="<?php echo $active_tab === 'bank' ? '' : 'display:none;'; ?>">
@@ -110,33 +87,6 @@ class ZLS_Settings {
             </form>
         </div>
         <?php
-    }
-    
-    public function ajax_add_address() {
-        check_ajax_referer('zls_settings_ajax', 'nonce');
-        if (!current_user_can('manage_options')) wp_send_json_error(array('message' => 'Unauthorized'));
-        $addr = isset($_POST['address']) ? $_POST['address'] : array();
-        $addresses = get_option('zls_us_addresses', array());
-        $new_addr = array('id' => uniqid('us_'), 'label' => sanitize_text_field($addr['label'] ?? ''), 'address_line1' => sanitize_text_field($addr['address_line1'] ?? ''), 'address_line2' => sanitize_text_field($addr['address_line2'] ?? ''), 'city' => sanitize_text_field($addr['city'] ?? ''), 'state' => sanitize_text_field($addr['state'] ?? ''), 'postal_code' => sanitize_text_field($addr['postal_code'] ?? ''), 'country' => sanitize_text_field($addr['country'] ?? 'USA'), 'contact_phone' => preg_replace('/[^0-9+\-\s()]/', '', $addr['contact_phone'] ?? ''), 'is_active' => true);
-        $addresses[] = $new_addr;
-        update_option('zls_us_addresses', $addresses);
-        ob_start(); ?>
-        <div class="zls-address-card" data-id="<?php echo esc_attr($new_addr['id']); ?>">
-            <div class="zls-address-header"><strong><?php echo esc_html($new_addr['label']); ?></strong><span class="zls-badge zls-active">Active</span><button type="button" class="zls-btn-remove" data-id="<?php echo esc_attr($new_addr['id']); ?>">✕</button></div>
-            <div class="zls-address-body"><p><?php echo esc_html($new_addr['address_line1']); ?><?php if(!empty($new_addr['address_line2'])) echo ', ' . esc_html($new_addr['address_line2']); ?><br><?php echo esc_html($new_addr['city']); ?>, <?php echo esc_html($new_addr['state']); ?> <?php echo esc_html($new_addr['postal_code']); ?>, <?php echo esc_html($new_addr['country']); ?><br>📞 <?php echo esc_html($new_addr['contact_phone']); ?></p></div>
-            <input type="hidden" name="zls_us_addresses[<?php echo esc_attr($new_addr['id']); ?>][is_active]" value="1"><label><input type="checkbox" checked disabled> Show to customers</label>
-        </div>
-        <?php wp_send_json_success(array('html' => ob_get_clean())); }
-        
-    public function ajax_remove_address() {
-        check_ajax_referer('zls_settings_ajax', 'nonce');
-        if (!current_user_can('manage_options')) wp_send_json_error(array('message' => 'Unauthorized'));
-        $id = sanitize_text_field($_POST['id'] ?? '');
-        if (empty($id)) wp_send_json_error();
-        $addresses = get_option('zls_us_addresses', array());
-        $filtered = array_filter($addresses, function($a) use ($id) { return isset($a['id']) && $a['id'] !== $id; });
-        update_option('zls_us_addresses', array_values($filtered));
-        wp_send_json_success();
     }
     
     public function render_email_templates() {

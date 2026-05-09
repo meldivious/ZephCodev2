@@ -1,34 +1,62 @@
-```
 # Dependencies
 vendor/
-node_modules/
+composer.lock
 
-# Build artifacts
-dist/
-build/
-*.min.js
-*.min.css
-
-# Logs
+# Logs and temp files
 *.log
+*.tmp
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
 # Editor/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
 # OS
 .DS_Store
 Thumbs.db
 
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Distribution
+dist/
+build/
+*.phar
+
+# Cache
+*.cache
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing
+.phpunit.result.cache
+.phpunit.xml
+test-results/
+
+# Backup files
+*~
+*.bak
+*.swp
+
+# Composer/Packagist
+composer.phar
+vendor/composer/installed.json
+
 # WordPress specific
 wp-content/cache/
 *.sql
-```
+*.sql.gz
+
+# Legacy rules preserved
+*.log

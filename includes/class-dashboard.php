@@ -21,18 +21,9 @@ class ZLS_Dashboard {
         $unique_id = get_user_meta($user_id, '_zls_unique_id', true);
         if (empty($unique_id)) $unique_id = 'PENDING'; // Fallback
         
-        // Get dynamic bank details and warehouse addresses from settings
+        // Get dynamic bank details and warehouse address from settings
         $bank_details = get_option('zls_bank_details', array());
-        $us_addresses = get_option('zls_us_addresses', array());
-        
-        // Get first active warehouse address or use default
-        $warehouse_address = null;
-        foreach ($us_addresses as $addr) {
-            if (!empty($addr['is_active'])) {
-                $warehouse_address = $addr;
-                break;
-            }
-        }
+        $warehouse_address = get_option('zls_warehouse_address', array());
 
         // KYC Check
         $kyc_status = get_user_meta($user_id, '_zls_kyc_status', true) ?: 'pending';

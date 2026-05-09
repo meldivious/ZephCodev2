@@ -416,6 +416,7 @@ add_action('plugins_loaded', 'zls_bootstrap');
 function zls_bootstrap() {
     zls_load_core_classes();
     if (class_exists('ZLS_Error_Handler')) ZLS_Error_Handler::init();
+    if (class_exists('ZLS_Address_Manager')) ZLS_Address_Manager::init();
     if (class_exists('ZLS_KYC_Manager')) ZLS_KYC_Manager::init();
     if (class_exists('ZLS_KYC_Frontend')) ZLS_KYC_Frontend::init();
     if (class_exists('ZLS_Request_Manager')) ZLS_Request_Manager::init();
