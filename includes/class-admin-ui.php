@@ -376,11 +376,28 @@ class ZLS_Admin_UI {
             echo '<div class="notice notice-success"><p>✅ Bank details saved successfully.</p></div>';
         }
         
+        // Handle save - Warehouse Address
+        if (isset($_POST['zls_save_warehouse_address'], $_POST['zls_warehouse_nonce']) && wp_verify_nonce($_POST['zls_warehouse_nonce'], 'zls_warehouse_address')) {
+            $warehouse = array(
+                'address_line1' => sanitize_text_field($_POST['address_line1'] ?? ''),
+                'address_line2' => sanitize_text_field($_POST['address_line2'] ?? ''),
+                'city' => sanitize_text_field($_POST['city'] ?? ''),
+                'state' => sanitize_text_field($_POST['state'] ?? ''),
+                'postal_code' => sanitize_text_field($_POST['postal_code'] ?? ''),
+                'country' => sanitize_text_field($_POST['country'] ?? 'USA'),
+                'contact_phone' => sanitize_text_field($_POST['contact_phone'] ?? ''),
+            );
+            update_option('zls_warehouse_address', $warehouse);
+            echo '<div class="notice notice-success"><p>✅ Warehouse address saved successfully.</p></div>';
+        }
+        
         $bank = get_option('zls_bank_details', array());
+        $warehouse = get_option('zls_warehouse_address', array());
         ?>
         <div class="wrap zls-admin-wrap">
             <h1 class="wp-heading-inline">⚙️ Settings</h1>
             
+            <!-- Bank Details Form -->
             <form method="post" class="zls-card">
                 <?php wp_nonce_field('zls_bank_details', 'zls_bank_nonce'); ?>
                 
@@ -416,6 +433,51 @@ class ZLS_Admin_UI {
                 
                 <div style="margin-top:24px;">
                     <button type="submit" name="zls_save_bank_details" class="button button-primary">💾 Save Bank Details</button>
+                </div>
+            </form>
+            
+            <!-- Warehouse Address Form -->
+            <form method="post" class="zls-card">
+                <?php wp_nonce_field('zls_warehouse_address', 'zls_warehouse_nonce'); ?>
+                
+                <div class="zls-card-header">
+                    <h2 class="zls-card-title">📦 Warehouse Address</h2>
+                    <p class="description">This address is displayed to users on their dashboard.</p>
+                </div>
+                
+                <div class="zls-form-grid">
+                    <div class="zls-form-group">
+                        <label>Address Line 1</label>
+                        <input type="text" name="address_line1" value="<?php echo esc_attr($warehouse['address_line1'] ?? ''); ?>" class="regular-text" required>
+                    </div>
+                    <div class="zls-form-group">
+                        <label>Address Line 2 (Optional)</label>
+                        <input type="text" name="address_line2" value="<?php echo esc_attr($warehouse['address_line2'] ?? ''); ?>" class="regular-text">
+                    </div>
+                    <div class="zls-form-group">
+                        <label>City</label>
+                        <input type="text" name="city" value="<?php echo esc_attr($warehouse['city'] ?? ''); ?>" class="regular-text" required>
+                    </div>
+                    <div class="zls-form-group">
+                        <label>State</label>
+                        <input type="text" name="state" value="<?php echo esc_attr($warehouse['state'] ?? ''); ?>" class="regular-text" required>
+                    </div>
+                    <div class="zls-form-group">
+                        <label>Postal Code</label>
+                        <input type="text" name="postal_code" value="<?php echo esc_attr($warehouse['postal_code'] ?? ''); ?>" class="regular-text" required>
+                    </div>
+                    <div class="zls-form-group">
+                        <label>Country</label>
+                        <input type="text" name="country" value="<?php echo esc_attr($warehouse['country'] ?? 'USA'); ?>" class="regular-text">
+                    </div>
+                    <div class="zls-form-group">
+                        <label>Phone</label>
+                        <input type="text" name="contact_phone" value="<?php echo esc_attr($warehouse['contact_phone'] ?? ''); ?>" class="regular-text">
+                    </div>
+                </div>
+                
+                <div style="margin-top:24px;">
+                    <button type="submit" name="zls_save_warehouse_address" class="button button-primary">💾 Save Warehouse Address</button>
                 </div>
             </form>
         </div>
