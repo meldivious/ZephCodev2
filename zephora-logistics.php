@@ -424,6 +424,7 @@ function zls_bootstrap() {
     if (class_exists('ZLS_Payments')) ZLS_Payments::init();
     if (class_exists('ZLS_PDF')) ZLS_PDF::init();
     if (class_exists('ZLS_Notifications')) ZLS_Notifications::init();
+    if (class_exists('ZLS_Admin_UI')) ZLS_Admin_UI::init();
     if (class_exists('ZLS_Settings')) ZLS_Settings::get_instance()->init();
     if (class_exists('ZLS_GDPR')) ZLS_GDPR::init();
     if (class_exists('ZLS_Bulk_Operations')) ZLS_Bulk_Operations::init();

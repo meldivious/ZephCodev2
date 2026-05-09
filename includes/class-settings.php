@@ -14,14 +14,9 @@ class ZLS_Settings {
     }
     
     public function init() {
-        add_action('admin_menu', array($this, 'add_settings_page'));
+        // No menu registration here - handled by ZLS_Admin_UI
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-    }
-    
-    public function add_settings_page() {
-        add_menu_page('Zephora Logistics', 'Zephora Logistics', 'manage_options', 'zephora-logistics', array($this, 'render_page'), 'dashicons-shipping', 30);
-        add_submenu_page('zephora-logistics', 'Settings', 'Settings', 'manage_options', 'zephora-logistics', array($this, 'render_page'));
     }
     
     public function register_settings() {
@@ -32,113 +27,10 @@ class ZLS_Settings {
     }
     
     public function enqueue_assets($hook) {
-        if (strpos($hook, 'zephora-logistics') === false) return;
+        if (strpos($hook, 'zls-') === false) return;
         wp_enqueue_style('zls-settings', ZLS_PLUGIN_URL . 'assets/css/admin.css', array(), ZLS_VERSION);
         wp_enqueue_script('zls-settings', ZLS_PLUGIN_URL . 'assets/js/settings.js', array('jquery'), ZLS_VERSION, true);
         wp_localize_script('zls-settings', 'zlsSettings', array('ajax_url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('zls_settings_ajax')));
-    }
-    
-    public function render_page() {
-        $settings = get_option('zls_settings', array());
-        $bank = get_option('zls_bank_details', array());
-        $warehouse = get_option('zls_warehouse_address', array());
-        $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'addresses';
-        ?>
-        <div class="wrap zls-settings-wrap">
-            <h1>Zephora Logistics Settings</h1>
-            <form method="post" action="options.php" id="zls-settings-form">
-                <?php settings_fields('zls_settings_group'); ?>
-                
-                <nav class="zls-settings-tabs">
-                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">Warehouse Address</button>
-                    <button type="button" class="<?php echo $active_tab === 'bank' ? 'active' : ''; ?>" data-tab="bank">Bank Details</button>
-                    <button type="button" class="<?php echo $active_tab === 'email' ? 'active' : ''; ?>" data-tab="email">Email Templates</button>
-                </nav>
-                
-                <div class="zls-settings-tab <?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" id="tab-addresses" style="<?php echo $active_tab === 'addresses' ? '' : 'display:none;'; ?>">
-                    <p class="description">Enter your warehouse address. This address will be displayed to customers on their dashboard.</p>
-                    <div class="zls-warehouse-form" style="background:#f9f9f9;padding:20px;border-radius:8px;">
-                        <h3>Warehouse Address</h3>
-                        <p><label>Address Line 1<br><input type="text" name="zls_warehouse_address[address_line1]" value="<?php echo esc_attr($warehouse['address_line1'] ?? ''); ?>" class="regular-text" required></label></p>
-                        <p><label>Address Line 2 (Optional)<br><input type="text" name="zls_warehouse_address[address_line2]" value="<?php echo esc_attr($warehouse['address_line2'] ?? ''); ?>" class="regular-text"></label></p>
-                        <p><label>City<br><input type="text" name="zls_warehouse_address[city]" value="<?php echo esc_attr($warehouse['city'] ?? ''); ?>" class="regular-text" required></label></p>
-                        <p><label>State<br><input type="text" name="zls_warehouse_address[state]" value="<?php echo esc_attr($warehouse['state'] ?? ''); ?>" class="regular-text" required></label></p>
-                        <p><label>Postal Code<br><input type="text" name="zls_warehouse_address[postal_code]" value="<?php echo esc_attr($warehouse['postal_code'] ?? ''); ?>" class="regular-text" required></label></p>
-                        <p><label>Country<br><input type="text" name="zls_warehouse_address[country]" value="<?php echo esc_attr($warehouse['country'] ?? 'USA'); ?>" class="regular-text"></label></p>
-                        <p><label>Phone<br><input type="text" name="zls_warehouse_address[contact_phone]" value="<?php echo esc_attr($warehouse['contact_phone'] ?? ''); ?>" class="regular-text"></label></p>
-                    </div>
-                </div>
-                
-                <div class="zls-settings-tab <?php echo $active_tab === 'bank' ? 'active' : ''; ?>" id="tab-bank" style="<?php echo $active_tab === 'bank' ? '' : 'display:none;'; ?>">
-                    <table class="form-table">
-                        <tr><th><label>Bank Name</label></th><td><input type="text" name="zls_bank_details[bank_name]" value="<?php echo esc_attr($bank['bank_name'] ?? ''); ?>" class="regular-text"></td></tr>
-                        <tr><th><label>Account Name</label></th><td><input type="text" name="zls_bank_details[account_name]" value="<?php echo esc_attr($bank['account_name'] ?? ''); ?>" class="regular-text"></td></tr>
-                        <tr><th><label>Account Number</label></th><td><input type="text" name="zls_bank_details[account_number]" value="<?php echo esc_attr($bank['account_number'] ?? ''); ?>" class="regular-text"></td></tr>
-                        <tr><th><label>SWIFT/BIC</label></th><td><input type="text" name="zls_bank_details[swift_code]" value="<?php echo esc_attr($bank['swift_code'] ?? ''); ?>" class="regular-text"></td></tr>
-                        <tr><th><label>Payment Note Template</label></th><td><textarea name="zls_bank_details[note]" rows="3" class="large-text"><?php echo esc_textarea($bank['note'] ?? 'Reference: ZLS-{request_id}'); ?></textarea><p class="description">Use <code>{request_id}</code> as placeholder.</p></td></tr>
-                    </table>
-                </div>
-                
-                <div class="zls-settings-tab <?php echo $active_tab === 'email' ? 'active' : ''; ?>" id="tab-email" style="<?php echo $active_tab === 'email' ? '' : 'display:none;'; ?>">
-                    <?php $this->render_email_templates(); ?>
-                </div>
-                
-                <?php submit_button('Save Settings'); ?>
-            </form>
-        </div>
-        <?php
-    }
-    
-    public function render_email_templates() {
-        $templates = get_option('zls_email_templates', array());
-        $defaults = $this->get_default_email_templates();
-        $admin_email = get_option('admin_email');
-        ?>
-        <div style="background:#f9f9f9;padding:20px;border-radius:8px;margin-bottom:20px;">
-            <h3>Email Notification Templates</h3>
-            <p class="description">Customize what gets sent to customers and admins for each event. Available variables: <code>{{customer_name}}</code>, <code>{{item}}</code>, <code>{{amount}}</code>, <code>{{tracking}}</code>, <code>{{status}}</code>, <code>{{request_date}}</code>, <code>{{admin_email}}</code></p>
-        </div>
-        
-        <?php foreach ($defaults as $event => $default): ?>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-bottom:20px;">
-            <h4 style="margin-top:0;"><?php echo esc_html($default['label']); ?></h4>
-            <p class="description"><?php echo esc_html($default['description']); ?></p>
-            
-            <table class="form-table">
-                <tr>
-                    <th style="width:150px;"><label>Send To:</label></th>
-                    <td>
-                        <fieldset>
-                            <label><input type="radio" name="zls_email_templates[<?php echo esc_attr($event); ?>][recipient]" value="user" <?php checked(!empty($templates[$event]) ? $templates[$event]['recipient'] : $default['recipient'], 'user'); ?>> Customer Only</label><br>
-                            <label><input type="radio" name="zls_email_templates[<?php echo esc_attr($event); ?>][recipient]" value="admin" <?php checked(!empty($templates[$event]) ? $templates[$event]['recipient'] : $default['recipient'], 'admin'); ?>> Admin Only</label><br>
-                            <label><input type="radio" name="zls_email_templates[<?php echo esc_attr($event); ?>][recipient]" value="both" <?php checked(!empty($templates[$event]) ? $templates[$event]['recipient'] : $default['recipient'], 'both'); ?>> Both</label>
-                        </fieldset>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label>Subject Line:</label></th>
-                    <td>
-                        <input type="text" name="zls_email_templates[<?php echo esc_attr($event); ?>][subject]" class="large-text" value="<?php echo esc_attr(!empty($templates[$event]) ? $templates[$event]['subject'] : $default['subject']); ?>">
-                    </td>
-                </tr>
-                <tr>
-                    <th><label>Message Body:</label></th>
-                    <td>
-                        <?php 
-                            $content = !empty($templates[$event]) ? $templates[$event]['message'] : $default['message'];
-                            wp_editor($content, 'zls_email_template_' . $event, array(
-                                'textarea_name' => 'zls_email_templates[' . esc_attr($event) . '][message]',
-                                'media_buttons' => false,
-                                'textarea_rows' => 6,
-                                'teeny' => true
-                            ));
-                        ?>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <?php endforeach; ?>
-        <?php
     }
     
     public function get_default_email_templates() {
