@@ -421,10 +421,10 @@ class ZLS_Admin_UI {
             
             <div class="zls-card" style="margin-top:24px;">
                 <div class="zls-card-header">
-                    <h2 class="zls-card-title">📍 US Warehouse Addresses</h2>
-                    <p class="description">Manage warehouse addresses shown to users. Configure in the main Zephora Logistics settings page.</p>
+                    <h2 class="zls-card-title">📍 Warehouse Address</h2>
+                    <p class="description">Manage warehouse address shown to users. Configure in the main Zephora Logistics settings page.</p>
                 </div>
-                <p><a href="<?php echo admin_url('admin.php?page=zephora-logistics#tab-addresses'); ?>" class="button">Manage Warehouse Addresses →</a></p>
+                <p><a href="<?php echo admin_url('admin.php?page=zephora-logistics#tab-addresses'); ?>" class="button">Manage Warehouse Address →</a></p>
             </div>
         </div>
         <?php

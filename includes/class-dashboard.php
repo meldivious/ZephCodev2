@@ -346,7 +346,7 @@ class ZLS_Dashboard {
                 <div class="zls-sidebar">
                     <div class="zls-warehouse-card">
                         <div class="zls-wh-head">
-                            <h3>US Warehouse</h3>
+                            <h3>Warehouse Address</h3>
                             <span>📍</span>
                         </div>
                         <div class="zls-wh-body">

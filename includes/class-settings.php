@@ -50,15 +50,15 @@ class ZLS_Settings {
                 <?php settings_fields('zls_settings_group'); ?>
                 
                 <nav class="zls-settings-tabs">
-                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">🇺🇸 US Warehouse Address</button>
+                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">📦 Warehouse Address</button>
                     <button type="button" class="<?php echo $active_tab === 'bank' ? 'active' : ''; ?>" data-tab="bank">🏦 Bank Details</button>
                     <button type="button" class="<?php echo $active_tab === 'email' ? 'active' : ''; ?>" data-tab="email">✉️ Email Templates</button>
                 </nav>
                 
                 <div class="zls-settings-tab <?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" id="tab-addresses" style="<?php echo $active_tab === 'addresses' ? '' : 'display:none;'; ?>">
-                    <p class="description">Enter your US warehouse address. This address will be displayed to customers on their dashboard.</p>
+                    <p class="description">Enter your warehouse address. This address will be displayed to customers on their dashboard.</p>
                     <div class="zls-warehouse-form" style="background:#f9f9f9;padding:20px;border-radius:8px;">
-                        <h3>US Warehouse Address</h3>
+                        <h3>Warehouse Address</h3>
                         <p><label>Address Line 1<br><input type="text" name="zls_warehouse_address[address_line1]" value="<?php echo esc_attr($warehouse['address_line1'] ?? ''); ?>" class="regular-text" required></label></p>
                         <p><label>Address Line 2 (Optional)<br><input type="text" name="zls_warehouse_address[address_line2]" value="<?php echo esc_attr($warehouse['address_line2'] ?? ''); ?>" class="regular-text"></label></p>
                         <p><label>City<br><input type="text" name="zls_warehouse_address[city]" value="<?php echo esc_attr($warehouse['city'] ?? ''); ?>" class="regular-text" required></label></p>
