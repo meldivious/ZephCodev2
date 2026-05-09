@@ -1,0 +1,187 @@
+.zls-status-badge { padding: 2px 8px; border-radius: 4px; font-weight: 500; background: #f0f0f1; }
+.zls-admin-card { background: #fff; padding: 15px; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 4px; }
+
+
+
+/* Zephora Settings Page - iOS Inspired */
+.zls-settings-wrap {
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.zls-settings-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.zls-settings-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px;
+    background: #f5f5f7;
+    border-bottom: 1px solid #e5e5ea;
+    overflow-x: auto;
+}
+
+.zls-settings-tabs button {
+    background: transparent;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #1d1d1f;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.zls-settings-tabs button.active {
+    background: #6B3AE4;
+    color: #fff;
+}
+
+.zls-settings-tabs button:hover:not(.active) {
+    background: #e8e8ed;
+}
+
+.zls-settings-tab {
+    padding: 24px;
+    display: none;
+}
+
+.zls-settings-tab.active {
+    display: block;
+}
+
+.zls-settings-tab h2 {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.zls-settings-tab .description {
+    color: #86868b;
+    font-size: 13px;
+    margin: 4px 0 12px 0;
+}
+
+/* Address Cards */
+.zls-address-card {
+    border: 1px solid #e5e5ea;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: #fff;
+}
+
+.zls-address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.zls-address-header strong {
+    font-weight: 600;
+}
+
+.zls-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.zls-badge.zls-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.zls-badge.zls-inactive {
+    background: #f5f5f7;
+    color: #86868b;
+}
+
+.zls-btn-remove {
+    background: none;
+    border: none;
+    color: #ff3b30;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+}
+
+.zls-address-body {
+    color: #666;
+    font-size: 14px;
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+/* Form Styling */
+.zls-settings-tab .form-table th {
+    width: 200px;
+    padding: 12px 10px 12px 0;
+    font-weight: 500;
+}
+
+.zls-settings-tab .form-table td {
+    padding: 12px 0;
+}
+
+.zls-settings-tab input[type="text"],
+.zls-settings-tab input[type="password"],
+.zls-settings-tab textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 12px;
+    border: 1px solid #e5e5ea;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.zls-settings-tab input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+/* Alert Boxes */
+.zls-alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 16px 0;
+    font-size: 14px;
+}
+
+.zls-alert.info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #90caf9;
+}
+
+/* Responsive */
+@media (max-width: 782px) {
+    .zls-settings-tabs {
+        padding: 12px;
+    }
+    .zls-settings-tabs button {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    .zls-settings-tab .form-table th,
+    .zls-settings-tab .form-table td {
+        display: block;
+        width: 100%;
+        padding: 8px 0;
+    }
+    .zls-settings-tab .form-table th {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .zls-settings-tab input[type="text"],
+    .zls-settings-tab input[type="password"],
+    .zls-settings-tab textarea {
+        max-width: 100%;
+    }
+}

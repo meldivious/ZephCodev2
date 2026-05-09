@@ -1,0 +1,8 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Zephora Logistic Systems 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-21 12:00+0000\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
