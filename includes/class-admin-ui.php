@@ -759,24 +759,19 @@ class ZLS_Admin_UI {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
         
         // Update meta
-        update_post_meta($post_id, '_zls_status', sanitize_text_field($_POST['zls_status'] ?? 'pending'));
+        $old_status = get_post_meta($post_id, '_zls_status', true);
+        $new_status = sanitize_text_field($_POST['zls_status'] ?? 'pending');
+        
+        update_post_meta($post_id, '_zls_status', $new_status);
         update_post_meta($post_id, '_zls_quote_amount', sanitize_text_field($_POST['zls_quote'] ?? ''));
         update_post_meta($post_id, '_zls_tracking_admin', sanitize_text_field($_POST['zls_track'] ?? ''));
         update_post_meta($post_id, '_zls_notes', sanitize_textarea_field($_POST['zls_notes'] ?? ''));
         
-        // Notification on quote_sent
-        $old_status = get_post_meta($post_id, '_zls_status', true);
-        $new_status = sanitize_text_field($_POST['zls_status'] ?? 'pending');
-        if ($new_status === 'quote_sent' && $old_status !== 'quote_sent') {
-            if (class_exists('ZLS_Notifications')) {
-                $user = get_userdata($post->post_author);
-                if ($user) {
-                    ZLS_Notifications::send($post->post_author, 'quote_ready', [
-                        'name' => $user->display_name,
-                        'item' => $post->post_title, 
-                        'amount' => floatval($_POST['zls_quote'] ?? 0)
-                    ]);
-                }
+        // Send email notifications on status change
+        if ($new_status !== $old_status && class_exists('ZLS_Notifications')) {
+            $user = get_userdata($post->post_author);
+            if ($user) {
+                ZLS_Notifications::send_notification($post_id, $new_status, $user, $post);
             }
         }
         

@@ -701,6 +701,16 @@ if (isset($_POST['zls_submit_kyc']) && isset($_POST['zls_kyc_nonce']) && wp_veri
         $gov_ext = strtolower(pathinfo($_FILES['zls_gov_id']['name'], PATHINFO_EXTENSION));
         $gov_size = $_FILES['zls_gov_id']['size'];
         
+        // Additional MIME type verification using mime_content_type if available
+        $gov_tmp_name = $_FILES['zls_gov_id']['tmp_name'];
+        if (function_exists('mime_content_type')) {
+            $actual_mime = mime_content_type($gov_tmp_name);
+            if (!in_array($actual_mime, $allowed_types)) {
+                echo '<div class="zls-alert error">Invalid Government ID file type detected. Only JPG, PNG, and PDF are allowed.</div>';
+                return ob_get_clean();
+            }
+        }
+        
         // Check file type by MIME and extension
         if (!in_array($gov_type, $allowed_types) || !in_array($gov_ext, $allowed_extensions)) {
             echo '<div class="zls-alert error">Invalid Government ID file type. Only JPG, PNG, and PDF are allowed.</div>';
@@ -711,6 +721,16 @@ if (isset($_POST['zls_submit_kyc']) && isset($_POST['zls_kyc_nonce']) && wp_veri
             $addr_type = $_FILES['zls_proof_address']['type'];
             $addr_ext = strtolower(pathinfo($_FILES['zls_proof_address']['name'], PATHINFO_EXTENSION));
             $addr_size = $_FILES['zls_proof_address']['size'];
+            
+            // Additional MIME type verification using mime_content_type if available
+            $addr_tmp_name = $_FILES['zls_proof_address']['tmp_name'];
+            if (function_exists('mime_content_type')) {
+                $actual_mime = mime_content_type($addr_tmp_name);
+                if (!in_array($actual_mime, $allowed_types)) {
+                    echo '<div class="zls-alert error">Invalid Proof of Address file type detected. Only JPG, PNG, and PDF are allowed.</div>';
+                    return ob_get_clean();
+                }
+            }
             
             if (!in_array($addr_type, $allowed_types) || !in_array($addr_ext, $allowed_extensions)) {
                 echo '<div class="zls-alert error">Invalid Proof of Address file type. Only JPG, PNG, and PDF are allowed.</div>';
