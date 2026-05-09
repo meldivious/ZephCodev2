@@ -50,9 +50,9 @@ class ZLS_Settings {
                 <?php settings_fields('zls_settings_group'); ?>
                 
                 <nav class="zls-settings-tabs">
-                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">📦 Warehouse Address</button>
-                    <button type="button" class="<?php echo $active_tab === 'bank' ? 'active' : ''; ?>" data-tab="bank">🏦 Bank Details</button>
-                    <button type="button" class="<?php echo $active_tab === 'email' ? 'active' : ''; ?>" data-tab="email">✉️ Email Templates</button>
+                    <button type="button" class="<?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" data-tab="addresses">Warehouse Address</button>
+                    <button type="button" class="<?php echo $active_tab === 'bank' ? 'active' : ''; ?>" data-tab="bank">Bank Details</button>
+                    <button type="button" class="<?php echo $active_tab === 'email' ? 'active' : ''; ?>" data-tab="email">Email Templates</button>
                 </nav>
                 
                 <div class="zls-settings-tab <?php echo $active_tab === 'addresses' ? 'active' : ''; ?>" id="tab-addresses" style="<?php echo $active_tab === 'addresses' ? '' : 'display:none;'; ?>">
@@ -95,7 +95,7 @@ class ZLS_Settings {
         $admin_email = get_option('admin_email');
         ?>
         <div style="background:#f9f9f9;padding:20px;border-radius:8px;margin-bottom:20px;">
-            <h3>📧 Email Notification Templates</h3>
+            <h3>Email Notification Templates</h3>
             <p class="description">Customize what gets sent to customers and admins for each event. Available variables: <code>{{customer_name}}</code>, <code>{{item}}</code>, <code>{{amount}}</code>, <code>{{tracking}}</code>, <code>{{status}}</code>, <code>{{request_date}}</code>, <code>{{admin_email}}</code></p>
         </div>
         
@@ -144,66 +144,66 @@ class ZLS_Settings {
     public function get_default_email_templates() {
         return array(
             'kyc_approved' => array(
-                'label' => '✅ KYC Approved',
+                'label' => 'KYC Approved',
                 'description' => 'Sent when admin approves user KYC verification',
                 'recipient' => 'user',
-                'subject' => '✅ KYC Approved - Welcome to Zephora Logistics!',
+                'subject' => 'KYC Approved - Welcome to Zephora Logistics!',
                 'message' => 'Hi {{customer_name}},<br><br>Congratulations! Your KYC verification has been approved.<br><br>You now have full access to our SHIP FOR ME and BUY FOR ME services.<br><br>Login to your dashboard to get started: <a href="' . home_url('/my-dashboard') . '">My Dashboard</a><br><br>Thank you for choosing Zephora Logistics!<br><br>Best regards,<br>Zephora Logistics Team<br>{{admin_email}}'
             ),
             'kyc_denied' => array(
-                'label' => '❌ KYC Denied',
+                'label' => 'KYC Denied',
                 'description' => 'Sent when admin denies user KYC verification',
                 'recipient' => 'user',
-                'subject' => '❌ KYC Verification Update',
+                'subject' => 'KYC Verification Update',
                 'message' => 'Hi {{customer_name}},<br><br>Your KYC submission was reviewed and unfortunately denied.<br><br>Please review the KYC requirements and resubmit your verification documents.<br><br>If you have questions, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
             ),
             'kyc_banned' => array(
-                'label' => '🚫 Account Suspended',
+                'label' => 'Account Suspended',
                 'description' => 'Sent when admin bans/suspends a user account',
                 'recipient' => 'user',
-                'subject' => '🚫 Account Suspension Notice',
+                'subject' => 'Account Suspension Notice',
                 'message' => 'Hi {{customer_name}},<br><br>Your account has been suspended.<br><br>Please contact our support team at {{admin_email}} for assistance.<br><br>Best regards,<br>Zephora Logistics Team'
             ),
             'quote_sent' => array(
-                'label' => '📦 Quote Ready Notification',
+                'label' => 'Quote Ready Notification',
                 'description' => 'Sent when admin sets a quote for the request',
                 'recipient' => 'user',
-                'subject' => '✅ Quote Ready: {{item}}',
+                'subject' => 'Quote Ready: {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>Your quote for <strong>{{item}}</strong> is ready!<br><br><strong>Amount: ₦{{amount}} + VAT</strong><br><br>Please login to your dashboard to review and confirm payment.<br><br>Thank you,<br>Zephora Logistics Team'
             ),
             'paid' => array(
-                'label' => '💳 Payment Confirmed',
+                'label' => 'Payment Confirmed',
                 'description' => 'Sent when admin confirms payment has been received',
                 'recipient' => 'both',
-                'subject' => '✅ Payment Confirmed - {{item}}',
+                'subject' => 'Payment Confirmed - {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>We have confirmed receipt of your payment (₦{{amount}}).<br><br>Your order is now being processed. We will update you shortly.<br><br><strong>Request ID:</strong> {{request_date}}<br><br>Thank you for your business!<br>Zephora Logistics Team'
             ),
             'purchasing' => array(
-                'label' => '🛒 Purchasing in Progress',
+                'label' => 'Purchasing in Progress',
                 'description' => 'Sent when admin starts purchasing the item',
                 'recipient' => 'user',
-                'subject' => '🛒 We are Purchasing Your Item - {{item}}',
+                'subject' => 'We are Purchasing Your Item - {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>Great news! We are now purchasing your item.<br><br><strong>Item:</strong> {{item}}<br><br>We will notify you once it arrives at our warehouse.<br><br>Best regards,<br>Zephora Logistics Team'
             ),
             'received_us' => array(
-                'label' => '📥 Received at US Warehouse',
+                'label' => 'Received at US Warehouse',
                 'description' => 'Sent when item arrives at US warehouse',
                 'recipient' => 'user',
-                'subject' => '📥 Item Received at US Warehouse - {{item}}',
+                'subject' => 'Item Received at US Warehouse - {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>Your item has been received at our US warehouse.<br><br><strong>Item:</strong> {{item}}<br><br>We will prepare it for shipment to Nigeria shortly.<br><br>Best regards,<br>Zephora Logistics Team'
             ),
             'shipped' => array(
-                'label' => '📫 Package Shipped',
+                'label' => 'Package Shipped',
                 'description' => 'Sent when package leaves the warehouse',
                 'recipient' => 'user',
-                'subject' => '🚚 Your Package is On the Way - {{item}}',
+                'subject' => 'Your Package is On the Way - {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>Great news! Your package is on the way to Nigeria.<br><br><strong>Tracking Number:</strong> {{tracking}}<br><strong>Item:</strong> {{item}}<br><br>You can track your shipment using the tracking number. We will notify you once it arrives in Lagos.<br><br>Best regards,<br>Zephora Logistics Team'
             ),
             'delivered' => array(
-                'label' => '🎉 Delivery Complete',
+                'label' => 'Delivery Complete',
                 'description' => 'Sent when package is delivered to customer',
                 'recipient' => 'user',
-                'subject' => '🎉 Your Package Has Arrived! - {{item}}',
+                'subject' => 'Your Package Has Arrived! - {{item}}',
                 'message' => 'Hi {{customer_name}},<br><br>Your package has been successfully delivered!<br><br><strong>Item:</strong> {{item}}<br><strong>Tracking:</strong> {{tracking}}<br><br>Thank you for choosing Zephora Logistics. We hope you enjoy your purchase!<br><br>If you have any questions, please contact us at {{admin_email}}.<br><br>Best regards,<br>Zephora Logistics Team'
             )
         );

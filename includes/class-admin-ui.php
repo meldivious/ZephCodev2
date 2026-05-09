@@ -30,7 +30,7 @@ class ZLS_Admin_UI {
         add_action('load-edit.php', [__CLASS__, 'handle_bulk_actions']);
     }
 
-    // ✅ ADMIN MENU REGISTRATION
+    // ADMIN MENU REGISTRATION
     public static function add_admin_menu() {
         // Top-level menu
         add_menu_page(
@@ -98,7 +98,7 @@ class ZLS_Admin_UI {
         );
     }
 
-    // ✅ ADMIN ASSETS
+    // ADMIN ASSETS
     public static function enqueue_admin_assets($hook) {
         // Only load on our admin pages
         if (strpos($hook, 'zls-') === false && $hook !== 'edit.php') return;
@@ -140,7 +140,7 @@ class ZLS_Admin_UI {
         ');
     }
 
-    // ✅ ADMIN DASHBOARD
+    // ADMIN DASHBOARD
     public static function render_admin_dashboard() {
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
@@ -217,7 +217,7 @@ class ZLS_Admin_UI {
                     <tbody>
                         <?php while($recent->have_posts()): $recent->the_post(); 
                             $status = get_post_meta(get_the_ID(), '_zls_status', true) ?: 'pending';
-                            $type = get_post_type() === 'zls_ship' ? '📦 Ship' : '🛒 Buy';
+                            $type = get_post_type() === 'zls_ship' ? 'Ship' : 'Buy';
                             $user = get_userdata(get_post_field('post_author', get_the_ID()));
                         ?>
                         <tr>
@@ -239,7 +239,7 @@ class ZLS_Admin_UI {
         <?php
     }
 
-    // ✅ KYC REVIEWS PAGE
+    // KYC REVIEWS PAGE
     public static function render_kyc_reviews() {
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
@@ -261,7 +261,7 @@ class ZLS_Admin_UI {
                 if (class_exists('ZLS_Notifications')) {
                     ZLS_Notifications::send($user_id, 'kyc_approved', []);
                 }
-                echo '<div class="notice notice-success"><p>✅ KYC approved for user #' . $user_id . '</p></div>';
+                echo '<div class="notice notice-success"><p>KYC approved for user #' . $user_id . '</p></div>';
             } elseif ($action === 'deny') {
                 update_user_meta($user_id, '_zls_kyc_status', 'denied');
                 update_user_meta($user_id, '_zls_kyc_note', $reason);
@@ -273,7 +273,7 @@ class ZLS_Admin_UI {
                 if (class_exists('ZLS_Notifications')) {
                     ZLS_Notifications::send($user_id, 'kyc_denied', ['reason' => $reason]);
                 }
-                echo '<div class="notice notice-warning"><p>⚠️ KYC denied for user #' . $user_id . '</p></div>';
+                echo '<div class="notice notice-warning"><p>KYC denied for user #' . $user_id . '</p></div>';
             }
         }
         
@@ -286,12 +286,12 @@ class ZLS_Admin_UI {
         ));
         ?>
         <div class="wrap zls-admin-wrap">
-            <h1 class="wp-heading-inline">🆔 KYC Reviews</h1>
+            <h1 class="wp-heading-inline">KYC Reviews</h1>
             <span class="awaiting-mod count-<?php echo count($pending_users); ?>"><span class="pending-count"><?php echo count($pending_users); ?> pending</span></span>
             
             <?php if (empty($pending_users)): ?>
                 <div class="zls-card">
-                    <p style="color:#6b7280;">✅ No pending KYC submissions. Great job!</p>
+                    <p style="color:#6b7280;">No pending KYC submissions. Great job!</p>
                 </div>
             <?php else: ?>
                 <div class="zls-card">
@@ -321,15 +321,15 @@ class ZLS_Admin_UI {
                                 <td><?php echo $submitted !== 'N/A' ? date('M j, Y', strtotime($submitted)) : '—'; ?></td>
                                 <td>
                                     <?php if (!empty($kyc_data['gov_id_file'])): ?>
-                                        <a href="#" class="zls-btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="alert('Document viewer coming soon'); return false;">📄 ID</a>
+                                        <a href="#" class="zls-btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="alert('Document viewer coming soon'); return false;">ID</a>
                                     <?php endif; ?>
                                     <?php if (!empty($kyc_data['proof_address_file'])): ?>
-                                        <a href="#" class="zls-btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="alert('Document viewer coming soon'); return false;">🏠 Address</a>
+                                        <a href="#" class="zls-btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="alert('Document viewer coming soon'); return false;">Address</a>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=zls-kyc-reviews&zls_kyc_action=approve&user_id=' . $user->ID), 'zls_kyc_admin'); ?>" class="zls-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="return confirm('Approve KYC for <?php echo esc_js($user->display_name); ?>?')">✅ Approve</a>
-                                    <a href="#" class="zls-btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="toggleDenyForm(<?php echo $user->ID; ?>); return false;">❌ Deny</a>
+                                    <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=zls-kyc-reviews&zls_kyc_action=approve&user_id=' . $user->ID), 'zls_kyc_admin'); ?>" class="zls-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="return confirm('Approve KYC for <?php echo esc_js($user->display_name); ?>?')">Approve</a>
+                                    <a href="#" class="zls-btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="toggleDenyForm(<?php echo $user->ID; ?>); return false;">Deny</a>
                                     <div id="deny-form-<?php echo $user->ID; ?>" style="display:none; margin-top:8px;">
                                         <form method="get" style="display:flex; gap:8px;">
                                             <input type="hidden" name="page" value="zls-kyc-reviews">
@@ -357,7 +357,7 @@ class ZLS_Admin_UI {
         <?php
     }
 
-    // ✅ SETTINGS PAGE
+    // SETTINGS PAGE
     public static function render_settings() {
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
@@ -373,7 +373,7 @@ class ZLS_Admin_UI {
                 'note' => sanitize_textarea_field($_POST['payment_note'] ?? ''),
             );
             update_option('zls_bank_details', $bank);
-            echo '<div class="notice notice-success"><p>✅ Bank details saved successfully.</p></div>';
+            echo '<div class="notice notice-success"><p>Bank details saved successfully.</p></div>';
         }
         
         // Handle save - Warehouse Address
@@ -388,21 +388,21 @@ class ZLS_Admin_UI {
                 'contact_phone' => sanitize_text_field($_POST['contact_phone'] ?? ''),
             );
             update_option('zls_warehouse_address', $warehouse);
-            echo '<div class="notice notice-success"><p>✅ Warehouse address saved successfully.</p></div>';
+            echo '<div class="notice notice-success"><p>Warehouse address saved successfully.</p></div>';
         }
         
         $bank = get_option('zls_bank_details', array());
         $warehouse = get_option('zls_warehouse_address', array());
         ?>
         <div class="wrap zls-admin-wrap">
-            <h1 class="wp-heading-inline">⚙️ Settings</h1>
+            <h1 class="wp-heading-inline">Settings</h1>
             
             <!-- Bank Details Form -->
             <form method="post" class="zls-card">
                 <?php wp_nonce_field('zls_bank_details', 'zls_bank_nonce'); ?>
                 
                 <div class="zls-card-header">
-                    <h2 class="zls-card-title">🏦 Bank Details for Payment</h2>
+                    <h2 class="zls-card-title">Bank Details for Payment</h2>
                     <p class="description">These details are displayed to users on the frontend for bank transfer payments.</p>
                 </div>
                 
@@ -432,7 +432,7 @@ class ZLS_Admin_UI {
                 </div>
                 
                 <div style="margin-top:24px;">
-                    <button type="submit" name="zls_save_bank_details" class="button button-primary">💾 Save Bank Details</button>
+                    <button type="submit" name="zls_save_bank_details" class="button button-primary">Save Bank Details</button>
                 </div>
             </form>
             
@@ -441,7 +441,7 @@ class ZLS_Admin_UI {
                 <?php wp_nonce_field('zls_warehouse_address', 'zls_warehouse_nonce'); ?>
                 
                 <div class="zls-card-header">
-                    <h2 class="zls-card-title">📦 Warehouse Address</h2>
+                    <h2 class="zls-card-title">Warehouse Address</h2>
                     <p class="description">This address is displayed to users on their dashboard.</p>
                 </div>
                 
@@ -477,14 +477,14 @@ class ZLS_Admin_UI {
                 </div>
                 
                 <div style="margin-top:24px;">
-                    <button type="submit" name="zls_save_warehouse_address" class="button button-primary">💾 Save Warehouse Address</button>
+                    <button type="submit" name="zls_save_warehouse_address" class="button button-primary">Save Warehouse Address</button>
                 </div>
             </form>
         </div>
         <?php
     }
 
-    // ✅ EMAIL TEMPLATES PAGE
+    // EMAIL TEMPLATES PAGE
     public static function render_email_templates() {
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
@@ -502,7 +502,7 @@ class ZLS_Admin_UI {
                 );
             }
             update_option('zls_email_templates', $templates);
-            echo '<div class="notice notice-success"><p>✅ Email templates saved successfully.</p></div>';
+            echo '<div class="notice notice-success"><p>Email templates saved successfully.</p></div>';
         }
         
         $templates = get_option('zls_email_templates', array());
@@ -510,11 +510,11 @@ class ZLS_Admin_UI {
         $admin_email = get_option('admin_email');
         ?>
         <div class="wrap zls-admin-wrap">
-            <h1 class="wp-heading-inline">✉️ Email Templates</h1>
+            <h1 class="wp-heading-inline">Email Templates</h1>
             
             <div class="zls-card" style="margin-bottom:20px;">
                 <div class="zls-card-header">
-                    <h2 class="zls-card-title">📧 Email Notification Templates</h2>
+                    <h2 class="zls-card-title">Email Notification Templates</h2>
                     <p class="description">Customize what gets sent to customers and admins for each event. Available variables: <code>{{customer_name}}</code>, <code>{{item}}</code>, <code>{{amount}}</code>, <code>{{tracking}}</code>, <code>{{status}}</code>, <code>{{request_date}}</code>, <code>{{admin_email}}</code></p>
                 </div>
             </div>
@@ -565,14 +565,14 @@ class ZLS_Admin_UI {
                 <?php endforeach; ?>
                 
                 <div style="margin-top:24px;">
-                    <button type="submit" name="zls_save_email_templates" class="button button-primary">💾 Save Email Templates</button>
+                    <button type="submit" name="zls_save_email_templates" class="button button-primary">Save Email Templates</button>
                 </div>
             </form>
         </div>
         <?php
     }
 
-    // ✅ EXISTING METHODS (kept from your original)
+    // EXISTING METHODS (kept from your original)
     public static function meta_boxes() {
         if (!current_user_can('manage_options')) return;
         add_meta_box('zls_request_box', 'Workflow & Quote', [__CLASS__, 'render_meta'], ['zls_ship', 'zls_buy'], 'side');
@@ -696,7 +696,7 @@ class ZLS_Admin_UI {
         }
     }
     
-    // ✅ BULK ACTIONS
+    // BULK ACTIONS
     public static function bulk_actions_js() {
         global $typenow;
         if (!in_array($typenow, ['zls_ship', 'zls_buy'])) return;
@@ -767,7 +767,7 @@ class ZLS_Admin_UI {
         }
     }
 
-    // ✅ FILTERS FOR LIST TABLES
+    // FILTERS FOR LIST TABLES
     public static function filter_request_list($post_type) {
         global $typenow;
         if ($typenow !== $post_type) return;
@@ -790,7 +790,7 @@ class ZLS_Admin_UI {
         <?php
     }
     
-    // ✅ HELPER METHODS
+    // HELPER METHODS
     private static function count_by_status($status) {
         $ship = new WP_Query(array('post_type' => 'zls_ship', 'fields' => 'ids', 'posts_per_page' => -1, 'meta_query' => array(array('key' => '_zls_status', 'value' => $status))));
         $buy = new WP_Query(array('post_type' => 'zls_buy', 'fields' => 'ids', 'posts_per_page' => -1, 'meta_query' => array(array('key' => '_zls_status', 'value' => $status))));
