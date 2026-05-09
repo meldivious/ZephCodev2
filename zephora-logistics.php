@@ -398,6 +398,7 @@ function zls_load_core_classes() {
         'class-pdf.php',
         'class-admin-ui.php',
         'class-dashboard.php',
+        'class-settings.php',
         'class-bulk-operations.php',
         'class-export-manager.php',
         'class-module-loader.php',
